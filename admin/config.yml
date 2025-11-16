@@ -1,0 +1,20 @@
+backend:
+  name: github
+  repo: JuanCarlosValort/datadriven-scm  # ¡Asegúrate que este sea tu usuario/repo!
+  branch: main  # La rama donde se guardan los cambios
+
+publish_mode: editorial_workflow # Opcional: permite revisión antes de publicar
+
+media_folder: "assets/img/uploads"  # Donde se guardarán las imágenes subidas
+public_folder: "/assets/img/uploads" # La URL pública de las imágenes
+
+collections:
+  - name: "temas" # Nombre de la Colección (Ej: Temas de la Academia)
+    label: "Contenido de Temas"
+    folder: "src/temas" # La carpeta donde se guardarán los archivos Markdown (necesitarás crearla)
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Título", name: "title", widget: "string"}
+      - {label: "Cuerpo del Tema", name: "body", widget: "markdown"}
+      - {label: "Imagen Destacada", name: "featured_image", widget: "image", required: false}
