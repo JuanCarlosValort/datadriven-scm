@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DataDriven SCM - Supply Chain Intelligence</title>
@@ -24,13 +23,42 @@
             --light: #f8fafc;
             --gray: #64748b;
             --border: #e2e8f0;
+            
+            /* Theme variables */
+            --bg-gradient-1: #667eea;
+            --bg-gradient-2: #764ba2;
+            --hero-bg-1: #1a1f36;
+            --hero-bg-2: #0f172a;
+            --card-bg: #ffffff;
+            --text-primary: #1a1f36;
+            --text-secondary: #64748b;
+        }
+
+        body.dark-theme {
+            --bg-gradient-1: #1a1f36;
+            --bg-gradient-2: #0f172a;
+            --hero-bg-1: #0f172a;
+            --hero-bg-2: #020617;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --light: #1e293b;
+            --border: #334155;
+        }
+
+        body.ocean-theme {
+            --bg-gradient-1: #0ea5e9;
+            --bg-gradient-2: #06b6d4;
+            --secondary: #0ea5e9;
+            --accent: #06b6d4;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
             min-height: 100vh;
             position: relative;
+            transition: all 0.3s ease;
         }
 
         body::before {
@@ -100,7 +128,7 @@
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #1a1f36 0%, #0f172a 100%);
+            background: linear-gradient(135deg, var(--hero-bg-1) 0%, var(--hero-bg-2) 100%);
             padding: 4rem 2rem;
             text-align: center;
             position: relative;
@@ -183,9 +211,31 @@
             }
         }
 
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
         /* Navigation */
         .nav-container {
-            background: white;
+            background: var(--card-bg);
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
@@ -208,7 +258,7 @@
         .nav-title {
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -232,7 +282,7 @@
         /* Sidebar */
         .sidebar {
             width: 300px;
-            background: white;
+            background: var(--card-bg);
             border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             padding: 1.5rem;
@@ -248,13 +298,180 @@
         .sidebar-title {
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
             border-bottom: 2px solid var(--border);
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        /* Streak Counter */
+        .streak-container {
+            background: linear-gradient(135deg, var(--warning), var(--danger));
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .streak-number {
+            font-size: 3rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .streak-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Achievements Section */
+        .achievements-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .achievement-badge {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 2rem;
+            background: var(--light);
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .achievement-badge.unlocked {
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            border-color: var(--success);
+            color: white;
+            animation: badgeUnlock 0.5s ease;
+        }
+
+        .achievement-badge.locked {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        .achievement-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .achievement-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 0.5rem;
+            z-index: 10;
+        }
+
+        .achievement-badge:hover .achievement-tooltip {
+            opacity: 1;
+        }
+
+        @keyframes badgeUnlock {
+            0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .theme-option {
+            padding: 0.8rem 0.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: var(--card-bg);
+            text-align: center;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .theme-option.active {
+            border-color: var(--secondary);
+            background: var(--secondary);
+            color: white;
+        }
+
+        .theme-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .theme-preview.default {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .theme-preview.dark {
+            background: linear-gradient(135deg, #1a1f36, #0f172a);
+        }
+
+        .theme-preview.ocean {
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
         }
 
         .section-list {
@@ -266,7 +483,7 @@
         }
 
         .section-header {
-            background: linear-gradient(90deg, var(--light) 0%, white 100%);
+            background: var(--card-bg);
             padding: 0.8rem 1rem;
             border-radius: 10px;
             cursor: pointer;
@@ -274,7 +491,8 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
         }
 
         .section-header:hover {
@@ -344,7 +562,7 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            background: white;
+            background: var(--card-bg);
             border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             padding: 2rem;
@@ -386,12 +604,12 @@
 
         .welcome-title {
             font-size: 2rem;
-            color: var(--primary);
+            color: var(--text-primary);
             margin-bottom: 1rem;
         }
 
         .welcome-text {
-            color: var(--gray);
+            color: var(--text-secondary);
             font-size: 1.1rem;
             line-height: 1.8;
             max-width: 600px;
@@ -406,11 +624,12 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, var(--light) 0%, white 100%);
+            background: var(--card-bg);
             padding: 1.5rem;
             border-radius: 12px;
             border: 2px solid var(--border);
             transition: all 0.3s ease;
+            text-align: center;
         }
 
         .stat-card:hover {
@@ -419,18 +638,124 @@
             border-color: var(--secondary);
         }
 
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
         .stat-number {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 800;
             color: var(--secondary);
             margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            color: var(--gray);
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem 1.5rem;
+            border-radius: 15px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: var(--secondary);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Quick Start */
+        .quick-start {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-top: 3rem;
+            color: white;
+            box-shadow: 0 10px 40px rgba(14, 165, 233, 0.3);
+        }
+
+        .quick-start-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .quick-start-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .step-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.4;
         }
 
         /* Topic View */
@@ -442,7 +767,7 @@
 
         .topic-title-display {
             font-size: 2rem;
-            color: var(--primary);
+            color: var(--text-primary);
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -452,7 +777,7 @@
         .topic-meta {
             display: flex;
             gap: 2rem;
-            color: var(--gray);
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
 
@@ -474,7 +799,7 @@
         }
 
         .content-display h2 {
-            color: var(--primary);
+            color: var(--text-primary);
             margin: 2rem 0 1rem;
             font-size: 1.6rem;
             border-left: 4px solid var(--secondary);
@@ -482,7 +807,7 @@
         }
 
         .content-display h3 {
-            color: var(--primary);
+            color: var(--text-primary);
             margin: 1.5rem 0 0.8rem;
             font-size: 1.3rem;
         }
@@ -523,7 +848,7 @@
             padding-left: 1.5rem;
             margin: 1.5rem 0;
             font-style: italic;
-            color: var(--gray);
+            color: var(--text-secondary);
         }
 
         .empty-content {
@@ -531,7 +856,7 @@
             padding: 3rem;
             border-radius: 12px;
             text-align: center;
-            color: var(--gray);
+            color: var(--text-secondary);
         }
 
         .empty-content i {
@@ -602,7 +927,7 @@
 
         .comments-header {
             font-size: 1.5rem;
-            color: var(--primary);
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
@@ -638,11 +963,11 @@
 
         .comment-author {
             font-weight: 700;
-            color: var(--primary);
+            color: var(--text-primary);
         }
 
         .comment-date {
-            color: var(--gray);
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
 
@@ -702,14 +1027,14 @@
 
         .btn-secondary {
             background: var(--light);
-            color: var(--primary);
+            color: var(--text-primary);
             border: 2px solid var(--border);
         }
 
         .btn-secondary:hover {
             background: var(--primary);
             color: white;
-            border-color: var(--primary);
+            border-color: var(--text-primary);
         }
 
         /* Forms */
@@ -720,7 +1045,7 @@
         .form-label {
             display: block;
             margin-bottom: 0.5rem;
-            color: var(--primary);
+            color: var(--text-primary);
             font-weight: 600;
         }
 
@@ -789,7 +1114,7 @@
 
         .modal-title {
             font-size: 1.5rem;
-            color: var(--primary);
+            color: var(--text-primary);
             font-weight: 700;
         }
 
@@ -797,7 +1122,7 @@
             background: none;
             border: none;
             font-size: 1.5rem;
-            color: var(--gray);
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -977,6 +1302,48 @@
         <div class="content-wrapper">
             <!-- Sidebar -->
             <aside id="sidebar" class="sidebar">
+                <!-- Streak Counter -->
+                <div class="streak-container">
+                    <div class="streak-label">🔥 Racha Actual</div>
+                    <div class="streak-number">
+                        <span id="streakDays">0</span>
+                    </div>
+                    <div class="streak-label">días consecutivos</div>
+                </div>
+
+                <!-- Achievements -->
+                <div class="achievements-section">
+                    <h3 class="sidebar-title" style="margin-bottom: 0.5rem; padding-bottom: 0.5rem;">
+                        <i class="fas fa-trophy"></i>
+                        Logros
+                    </h3>
+                    <div class="achievements-grid" id="achievementsGrid">
+                        <!-- Achievements will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Theme Selector -->
+                <div class="theme-selector">
+                    <h3 class="sidebar-title" style="margin-bottom: 0.5rem; padding-bottom: 0.5rem;">
+                        <i class="fas fa-palette"></i>
+                        Tema
+                    </h3>
+                    <div class="theme-options">
+                        <div class="theme-option active" onclick="changeTheme('default')">
+                            <span class="theme-preview default"></span>
+                            Clásico
+                        </div>
+                        <div class="theme-option" onclick="changeTheme('dark')">
+                            <span class="theme-preview dark"></span>
+                            Oscuro
+                        </div>
+                        <div class="theme-option" onclick="changeTheme('ocean')">
+                            <span class="theme-preview ocean"></span>
+                            Océano
+                        </div>
+                    </div>
+                </div>
+
                 <h2 class="sidebar-title">
                     <i class="fas fa-list"></i>
                     Secciones
@@ -1001,20 +1368,71 @@
                         
                         <div class="stats-grid">
                             <div class="stat-card">
+                                <div class="stat-icon">📊</div>
                                 <div class="stat-number" id="statSections">0</div>
                                 <div class="stat-label">Secciones Disponibles</div>
                             </div>
                             <div class="stat-card">
+                                <div class="stat-icon">📚</div>
                                 <div class="stat-number" id="statTopics">0</div>
                                 <div class="stat-label">Temas Publicados</div>
                             </div>
                             <div class="stat-card">
+                                <div class="stat-icon">💬</div>
                                 <div class="stat-number" id="statComments">0</div>
                                 <div class="stat-label">Comentarios Totales</div>
                             </div>
                             <div class="stat-card">
+                                <div class="stat-icon">⭐</div>
                                 <div class="stat-number" id="statRating">5.0</div>
                                 <div class="stat-label">Valoración Promedio</div>
+                            </div>
+                        </div>
+
+                        <!-- Features Grid -->
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">🎯</div>
+                                <h3 class="feature-title">Contenido Especializado</h3>
+                                <p class="feature-description">Accede a temas curados en Estadística, Logística, Ciencia de Datos y más.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">💡</div>
+                                <h3 class="feature-title">Aprende y Comenta</h3>
+                                <p class="feature-description">Participa en discusiones y comparte tu experiencia con la comunidad.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🏆</div>
+                                <h3 class="feature-title">Desbloquea Logros</h3>
+                                <p class="feature-description">Alcanza metas y gana badges mientras aprendes y contribuyes.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔥</div>
+                                <h3 class="feature-title">Mantén tu Racha</h3>
+                                <p class="feature-description">Visita diariamente y construye una racha de aprendizaje constante.</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Start -->
+                        <div class="quick-start">
+                            <h3 class="quick-start-title">🚀 Comienza Ahora</h3>
+                            <div class="quick-start-steps">
+                                <div class="step-item">
+                                    <div class="step-number">1</div>
+                                    <div class="step-text">Explora las secciones en el menú lateral</div>
+                                </div>
+                                <div class="step-item">
+                                    <div class="step-number">2</div>
+                                    <div class="step-text">Lee temas que te interesen</div>
+                                </div>
+                                <div class="step-item">
+                                    <div class="step-number">3</div>
+                                    <div class="step-text">Deja comentarios y calificaciones</div>
+                                </div>
+                                <div class="step-item">
+                                    <div class="step-number">4</div>
+                                    <div class="step-text">¡Desbloquea logros y disfruta aprendiendo!</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1030,7 +1448,7 @@
 
     <!-- Login Container -->
     <div class="login-container" id="loginContainer">
-        <button class="login-btn" onclick="netlifyIdentity.open()">
+        <button class="login-btn" onclick="openModal('loginModal')">
             <i class="fas fa-lock"></i>
             Acceso Admin
         </button>
@@ -1132,6 +1550,25 @@
                     topics: []
                 }
             ],
+            isAdmin: false,
+            adminPassword: 'admin123', // En producción, esto debería estar en un servidor
+            streak: {
+                current: 0,
+                lastVisit: null
+            },
+            achievements: {
+                firstTopic: false,
+                firstComment: false,
+                weekStreak: false
+            },
+            theme: 'default'
+        };
+
+        // Achievements definitions
+        const achievementsDef = {
+            firstTopic: { icon: '📚', name: 'Primer Tema', description: 'Crea tu primer tema' },
+            firstComment: { icon: '💬', name: 'Primer Comentario', description: 'Deja tu primer comentario' },
+            weekStreak: { icon: '🔥', name: '7 Días', description: 'Mantén una racha de 7 días' }
         };
 
         let currentSection = null;
@@ -1143,6 +1580,9 @@
             renderSections();
             updateStats();
             checkAdminStatus();
+            updateStreak();
+            renderAchievements();
+            applyTheme(appData.theme);
         }
 
         // Load data from localStorage
@@ -1151,6 +1591,9 @@
             if (saved) {
                 const parsed = JSON.parse(saved);
                 appData.sections = parsed.sections || appData.sections;
+                appData.streak = parsed.streak || appData.streak;
+                appData.achievements = parsed.achievements || appData.achievements;
+                appData.theme = parsed.theme || appData.theme;
             } else {
                 // Add sample data
                 addSampleData();
@@ -1160,9 +1603,13 @@
         // Save data
         function saveData() {
             localStorage.setItem('dataDrivenSCM_v2', JSON.stringify({
-                sections: appData.sections
+                sections: appData.sections,
+                streak: appData.streak,
+                achievements: appData.achievements,
+                theme: appData.theme
             }));
             updateStats();
+            checkAchievements();
         }
 
         // Check admin status
@@ -1237,7 +1684,7 @@
                             <span>${section.name}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 0.9rem; color: var(--gray);">${section.topics.length}</span>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">${section.topics.length}</span>
                             ${appData.isAdmin ? `
                                 <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" 
                                         onclick="deleteSection(event, '${section.id}')">
@@ -1252,7 +1699,7 @@
                 const topicsHTML = `
                     <ul class="topics-list ${currentSection?.id === section.id ? 'active' : ''}" id="topics-${section.id}">
                         ${section.topics.length === 0 
-                            ? '<li style="color: var(--gray); padding: 0.5rem 1rem; font-style: italic;">No hay temas aún</li>'
+                            ? '<li style="color: var(--text-secondary); padding: 0.5rem 1rem; font-style: italic;">No hay temas aún</li>'
                             : section.topics.map((topic, index) => `
                                 <li class="topic-item ${currentTopic?.id === topic.id ? 'active' : ''}" 
                                     onclick="showTopic('${section.id}', ${index})">
@@ -1644,7 +2091,7 @@
         // Render comments
         function renderComments(comments) {
             if (!comments || comments.length === 0) {
-                return '<p style="color: var(--gray); text-align: center; padding: 2rem;">No hay comentarios aún. ¡Sé el primero en comentar!</p>';
+                return '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No hay comentarios aún. ¡Sé el primero en comentar!</p>';
             }
             
             return comments.map(comment => `
@@ -1820,6 +2267,153 @@ Identifica problemas antes de que ocurran:
             });
 
             saveData();
+        }
+
+        // Update streak
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const lastVisit = appData.streak.lastVisit;
+            
+            if (!lastVisit) {
+                // Primera visita
+                appData.streak.current = 1;
+                appData.streak.lastVisit = today;
+            } else {
+                const lastDate = new Date(lastVisit);
+                const todayDate = new Date(today);
+                const diffTime = todayDate - lastDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) {
+                    // Mismo día, no hacer nada
+                } else if (diffDays === 1) {
+                    // Día consecutivo
+                    appData.streak.current++;
+                    appData.streak.lastVisit = today;
+                } else {
+                    // Racha rota
+                    appData.streak.current = 1;
+                    appData.streak.lastVisit = today;
+                }
+            }
+            
+            document.getElementById('streakDays').textContent = appData.streak.current;
+            saveData();
+        }
+
+        // Render achievements
+        function renderAchievements() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = '';
+            
+            Object.keys(achievementsDef).forEach(key => {
+                const achievement = achievementsDef[key];
+                const isUnlocked = appData.achievements[key];
+                
+                const badge = document.createElement('div');
+                badge.className = `achievement-badge ${isUnlocked ? 'unlocked' : 'locked'}`;
+                badge.innerHTML = `
+                    ${achievement.icon}
+                    <div class="achievement-tooltip">${achievement.description}</div>
+                `;
+                
+                grid.appendChild(badge);
+            });
+        }
+
+        // Check achievements
+        function checkAchievements() {
+            let updated = false;
+            const totalTopics = appData.sections.reduce((acc, s) => acc + s.topics.length, 0);
+            const totalComments = appData.sections.reduce((acc, s) => 
+                acc + s.topics.reduce((tacc, t) => tacc + (t.comments?.length || 0), 0), 0);
+            
+            // First topic
+            if (!appData.achievements.firstTopic && totalTopics >= 1) {
+                appData.achievements.firstTopic = true;
+                updated = true;
+                showAchievementNotification('📚 ¡Primer Tema desbloqueado!');
+            }
+            
+            // First comment
+            if (!appData.achievements.firstComment && totalComments >= 1) {
+                appData.achievements.firstComment = true;
+                updated = true;
+                showAchievementNotification('💬 ¡Primer Comentario desbloqueado!');
+            }
+            
+            // Week streak
+            if (!appData.achievements.weekStreak && appData.streak.current >= 7) {
+                appData.achievements.weekStreak = true;
+                updated = true;
+                showAchievementNotification('🔥 ¡7 Días desbloqueado!');
+            }
+            
+            if (updated) {
+                renderAchievements();
+            }
+        }
+
+        // Show achievement notification
+        function showAchievementNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--success), var(--accent));
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 3s;
+                font-weight: 600;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3500);
+        }
+
+        // Change theme
+        function changeTheme(theme) {
+            // Remove all theme classes
+            document.body.classList.remove('dark-theme', 'ocean-theme');
+            
+            // Add new theme class
+            if (theme !== 'default') {
+                document.body.classList.add(`${theme}-theme`);
+            }
+            
+            // Update active button
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            event.target.closest('.theme-option').classList.add('active');
+            
+            // Save theme
+            appData.theme = theme;
+            saveData();
+        }
+
+        // Apply theme
+        function applyTheme(theme) {
+            if (theme && theme !== 'default') {
+                document.body.classList.add(`${theme}-theme`);
+            }
+            
+            // Update active button
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                const themeName = opt.onclick.toString().match(/changeTheme\('(\w+)'\)/)[1];
+                if (themeName === theme) {
+                    opt.classList.add('active');
+                } else {
+                    opt.classList.remove('active');
+                }
+            });
         }
 
         // Initialize on load
