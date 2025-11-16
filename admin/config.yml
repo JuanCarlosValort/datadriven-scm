@@ -1,8 +1,10 @@
 backend:
-  name: github
-  repo: JuanCarlosValort/datadriven-scm
-  branch: main
+  # Usa github o git-gateway. Git-gateway es más fácil para usuarios no técnicos.
+  name: github 
+  repo: JuanCarlosValort/datadriven-scm # ASEGÚRATE DE QUE ESTE NOMBRE DE REPOSITORIO SEA CORRECTO
+  branch: main # O la rama donde almacenas tu código
 
+# Carpetas donde se guardarán las imágenes
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
 
