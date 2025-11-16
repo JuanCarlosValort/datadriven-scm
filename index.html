@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataDriven SCM - Supply Chain Intelligence</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1f36;
+            --secondary: #0ea5e9;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Admin Controls */
+        .admin-bar {
+            background: linear-gradient(90deg, var(--dark) 0%, #1e293b 100%);
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .admin-bar.active {
+            display: block;
+        }
+
+        .admin-controls {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-label {
+            background: var(--success);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            transition: margin-top 0.3s ease;
+        }
+
+        .main-container.admin-active {
+            margin-top: 70px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1a1f36 0%, #0f172a 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)" /></svg>');
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: slideDown 0.8s ease;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideDown 0.8s ease 0.2s both;
+        }
+
+        .hero-subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            animation: slideDown 0.8s ease 0.3s both;
+        }
+
+        .hero-author {
+            color: var(--secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            animation: slideDown 0.8s ease 0.4s both;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Navigation */
+        .nav-container {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container.admin-active {
+            top: 70px;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Content Area */
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+            min-height: 600px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar.admin-active {
+            top: 170px;
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-list {
+            list-style: none;
+        }
+
+        .section-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header {
+            background: linear-gradient(90deg, var(--light) 0%, white 100%);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .section-header:hover {
+            border-color: var(--secondary);
+            transform: translateX(5px);
+        }
+
+        .section-header.active {
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--accent) 100%);
+            color: white;
+        }
+
+        .section-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .section-icon {
+            font-size: 1.2rem;
+        }
+
+        .section-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.active .section-arrow {
+            transform: rotate(90deg);
+        }
+
+        .topics-list {
+            display: none;
+            padding-left: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .topics-list.active {
+            display: block;
+        }
+
+        .topic-item {
+            padding: 0.6rem 1rem;
+            margin: 0.3rem 0;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topic-item:hover {
+            background: linear-gradient(90deg, rgba(14, 165, 233, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+            border-left-color: var(--secondary);
+            transform: translateX(5px);
+        }
+
+        .topic-item.active {
+            background: linear-gradient(90deg, rgba(14, 165, 233, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            border-left-color: var(--secondary);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 2rem;
+            min-height: 600px;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Welcome View */
+        .welcome-view {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .welcome-icon {
+            font-size: 5rem;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-text {
+            color: var(--gray);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--light) 0%, white 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: var(--secondary);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Topic View */
+        .topic-header {
+            border-bottom: 3px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .topic-title-display {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .topic-meta {
+            display: flex;
+            gap: 2rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .topic-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .topic-content-area {
+            margin-bottom: 3rem;
+            min-height: 300px;
+        }
+
+        .content-display {
+            line-height: 1.8;
+            color: #334155;
+            font-size: 1.1rem;
+        }
+
+        .content-display h2 {
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+            font-size: 1.6rem;
+            border-left: 4px solid var(--secondary);
+            padding-left: 1rem;
+        }
+
+        .content-display h3 {
+            color: var(--primary);
+            margin: 1.5rem 0 0.8rem;
+            font-size: 1.3rem;
+        }
+
+        .content-display p {
+            margin-bottom: 1rem;
+        }
+
+        .content-display ul, .content-display ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-display li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content-display code {
+            background: var(--light);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: var(--accent);
+        }
+
+        .content-display pre {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .content-display blockquote {
+            border-left: 4px solid var(--secondary);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--gray);
+        }
+
+        .empty-content {
+            background: var(--light);
+            padding: 3rem;
+            border-radius: 12px;
+            text-align: center;
+            color: var(--gray);
+        }
+
+        .empty-content i {
+            font-size: 4rem;
+            color: var(--border);
+            margin-bottom: 1rem;
+        }
+
+        /* Editor */
+        .editor-container {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .editor-toolbar {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .editor-btn {
+            background: var(--light);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .editor-btn:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .editor-textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        /* Comments Section */
+        .comments-section {
+            border-top: 3px solid var(--border);
+            padding-top: 2rem;
+            margin-top: 3rem;
+        }
+
+        .comments-header {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comment-form {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .comment-item {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .comment-item:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .comment-header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .comment-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .comment-rating {
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-text {
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #22c55e 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #f87171 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            padding: 2rem;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        /* Login Form */
+        .login-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #334155 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-controls {
+                flex-direction: column;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .topic-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--secondary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Bar -->
+    <div id="adminBar" class="admin-bar">
+        <div class="admin-controls">
+            <div class="admin-label">
+                <i class="fas fa-shield-alt"></i>
+                Modo Administrador
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" onclick="openModal('sectionModal')">
+                    <i class="fas fa-folder-plus"></i> Nueva Sección
+                </button>
+                <button class="btn btn-success" onclick="openModal('topicModal')">
+                    <i class="fas fa-file-plus"></i> Nuevo Tema
+                </button>
+                <button class="btn btn-danger" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="mainContainer" class="main-container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-content">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-chart-network"></i>
+                    </div>
+                </div>
+                <h1>DataDriven SCM</h1>
+                <p class="hero-subtitle">Supply Chain Intelligence & Data Analytics Platform</p>
+                <p class="hero-author">
+                    <i class="fas fa-user-tie"></i> Juan Carlos Valencia Ortiz | Comprador Internacional
+                </p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav id="navContainer" class="nav-container">
+            <div class="nav-content">
+                <div class="nav-title">
+                    <i class="fas fa-layer-group"></i>
+                    Centro de Conocimiento
+                </div>
+                <div class="nav-actions">
+                    <span id="totalTopics" class="stat-label">0 Temas</span>
+                    <span id="totalSections" class="stat-label">0 Secciones</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar">
+                <h2 class="sidebar-title">
+                    <i class="fas fa-list"></i>
+                    Secciones
+                </h2>
+                <ul id="sectionsList" class="section-list">
+                    <!-- Sections will be rendered here -->
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Welcome View -->
+                <div id="welcomeView" class="view active">
+                    <div class="welcome-view">
+                        <i class="fas fa-rocket welcome-icon"></i>
+                        <h2 class="welcome-title">Bienvenido a DataDriven SCM</h2>
+                        <p class="welcome-text">
+                            Tu plataforma integral de conocimiento en Supply Chain Management, 
+                            Análisis de Datos y Tecnología Logística. Explora las secciones 
+                            disponibles para acceder a contenido especializado.
+                        </p>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="statSections">0</div>
+                                <div class="stat-label">Secciones Disponibles</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="statTopics">0</div>
+                                <div class="stat-label">Temas Publicados</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="statComments">0</div>
+                                <div class="stat-label">Comentarios Totales</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="statRating">5.0</div>
+                                <div class="stat-label">Valoración Promedio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic View -->
+                <div id="topicView" class="view">
+                    <!-- Topic content will be rendered here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container" id="loginContainer">
+        <button class="login-btn" onclick="openModal('loginModal')">
+            <i class="fas fa-lock"></i>
+            Acceso Admin
+        </button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Acceso Administrador</h2>
+                <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Contraseña:</label>
+                <input type="password" id="adminPassword" class="form-control" placeholder="Ingresa la contraseña">
+            </div>
+            <button class="btn btn-primary" onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- Section Modal -->
+    <div id="sectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nueva Sección</h2>
+                <button class="modal-close" onclick="closeModal('sectionModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nombre de la Sección:</label>
+                <input type="text" id="sectionName" class="form-control" placeholder="Ej: Machine Learning">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Icono (Font Awesome):</label>
+                <input type="text" id="sectionIcon" class="form-control" placeholder="Ej: fa-brain" value="fa-folder">
+            </div>
+            <button class="btn btn-success" onclick="addSection()">
+                <i class="fas fa-save"></i> Crear Sección
+            </button>
+        </div>
+    </div>
+
+    <!-- Topic Modal -->
+    <div id="topicModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Tema</h2>
+                <button class="modal-close" onclick="closeModal('topicModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sección:</label>
+                <select id="topicSection" class="form-control">
+                    <!-- Options will be rendered here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Título del Tema:</label>
+                <input type="text" id="topicTitle" class="form-control" placeholder="Ej: Introducción a Python">
+            </div>
+            <button class="btn btn-success" onclick="addTopic()">
+                <i class="fas fa-save"></i> Crear Tema
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data Structure
+        let appData = {
+            sections: [
+                {
+                    id: 'estadistica',
+                    name: 'Estadística',
+                    icon: 'fa-chart-bar',
+                    topics: []
+                },
+                {
+                    id: 'logistica',
+                    name: 'Logística',
+                    icon: 'fa-truck',
+                    topics: []
+                },
+                {
+                    id: 'ciencia-datos',
+                    name: 'Ciencia de Datos',
+                    icon: 'fa-database',
+                    topics: []
+                },
+                {
+                    id: 'sql',
+                    name: 'SQL',
+                    icon: 'fa-code',
+                    topics: []
+                },
+                {
+                    id: 'excel',
+                    name: 'Excel',
+                    icon: 'fa-file-excel',
+                    topics: []
+                }
+            ],
+            isAdmin: false,
+            adminPassword: 'admin123' // En producción, esto debería estar en un servidor
+        };
+
+        let currentSection = null;
+        let currentTopic = null;
+
+        // Initialize
+        function init() {
+            loadData();
+            renderSections();
+            updateStats();
+            checkAdminStatus();
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('dataDrivenSCM_v2');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                appData.sections = parsed.sections || appData.sections;
+            } else {
+                // Add sample data
+                addSampleData();
+            }
+        }
+
+        // Save data
+        function saveData() {
+            localStorage.setItem('dataDrivenSCM_v2', JSON.stringify({
+                sections: appData.sections
+            }));
+            updateStats();
+        }
+
+        // Check admin status
+        function checkAdminStatus() {
+            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+            if (isAdmin) {
+                enableAdminMode();
+            }
+        }
+
+        // Login
+        function login() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === appData.adminPassword) {
+                sessionStorage.setItem('isAdmin', 'true');
+                enableAdminMode();
+                closeModal('loginModal');
+                document.getElementById('adminPassword').value = '';
+            } else {
+                alert('Contraseña incorrecta');
+            }
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.removeItem('isAdmin');
+            disableAdminMode();
+        }
+
+        // Enable admin mode
+        function enableAdminMode() {
+            appData.isAdmin = true;
+            document.getElementById('adminBar').classList.add('active');
+            document.getElementById('mainContainer').classList.add('admin-active');
+            document.getElementById('navContainer').classList.add('admin-active');
+            document.getElementById('sidebar').classList.add('admin-active');
+            document.getElementById('loginContainer').style.display = 'none';
+            renderSections();
+            if (currentTopic) {
+                showTopic(currentSection, currentTopic);
+            }
+        }
+
+        // Disable admin mode
+        function disableAdminMode() {
+            appData.isAdmin = false;
+            document.getElementById('adminBar').classList.remove('active');
+            document.getElementById('mainContainer').classList.remove('admin-active');
+            document.getElementById('navContainer').classList.remove('admin-active');
+            document.getElementById('sidebar').classList.remove('admin-active');
+            document.getElementById('loginContainer').style.display = 'block';
+            renderSections();
+            if (currentTopic) {
+                showTopic(currentSection, currentTopic);
+            }
+        }
+
+        // Render sections
+        function renderSections() {
+            const container = document.getElementById('sectionsList');
+            container.innerHTML = '';
+
+            appData.sections.forEach(section => {
+                const sectionEl = document.createElement('li');
+                sectionEl.className = 'section-item';
+                
+                const headerHTML = `
+                    <div class="section-header ${currentSection?.id === section.id ? 'active' : ''}" 
+                         onclick="toggleSection('${section.id}')">
+                        <div class="section-name">
+                            <i class="fas ${section.icon} section-icon"></i>
+                            <span>${section.name}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 0.9rem; color: var(--gray);">${section.topics.length}</span>
+                            ${appData.isAdmin ? `
+                                <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" 
+                                        onclick="deleteSection(event, '${section.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                            <i class="fas fa-chevron-right section-arrow"></i>
+                        </div>
+                    </div>
+                `;
+
+                const topicsHTML = `
+                    <ul class="topics-list ${currentSection?.id === section.id ? 'active' : ''}" id="topics-${section.id}">
+                        ${section.topics.length === 0 
+                            ? '<li style="color: var(--gray); padding: 0.5rem 1rem; font-style: italic;">No hay temas aún</li>'
+                            : section.topics.map((topic, index) => `
+                                <li class="topic-item ${currentTopic?.id === topic.id ? 'active' : ''}" 
+                                    onclick="showTopic('${section.id}', ${index})">
+                                    <span>${topic.title}</span>
+                                    ${appData.isAdmin ? `
+                                        <button class="btn btn-danger" style="padding: 0.2rem 0.4rem; font-size: 0.7rem;" 
+                                                onclick="deleteTopic(event, '${section.id}', ${index})">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    ` : ''}
+                                </li>
+                            `).join('')
+                        }
+                    </ul>
+                `;
+
+                sectionEl.innerHTML = headerHTML + topicsHTML;
+                container.appendChild(sectionEl);
+            });
+
+            updateTopicSelect();
+        }
+
+        // Toggle section
+        function toggleSection(sectionId) {
+            const section = appData.sections.find(s => s.id === sectionId);
+            const header = event.currentTarget;
+            const topicsList = document.getElementById(`topics-${sectionId}`);
+
+            // Toggle active states
+            if (header.classList.contains('active')) {
+                header.classList.remove('active');
+                topicsList.classList.remove('active');
+                currentSection = null;
+            } else {
+                // Remove active from all
+                document.querySelectorAll('.section-header').forEach(h => h.classList.remove('active'));
+                document.querySelectorAll('.topics-list').forEach(t => t.classList.remove('active'));
+                
+                // Add active to current
+                header.classList.add('active');
+                topicsList.classList.add('active');
+                currentSection = section;
+            }
+        }
+
+        // Show topic
+        function showTopic(sectionId, topicIndex) {
+            const section = appData.sections.find(s => s.id === sectionId);
+            const topic = section.topics[topicIndex];
+            
+            if (!topic) return;
+
+            currentSection = section;
+            currentTopic = topic;
+
+            // Update active states
+            renderSections();
+
+            // Hide welcome view, show topic view
+            document.getElementById('welcomeView').classList.remove('active');
+            document.getElementById('topicView').classList.add('active');
+
+            // Render topic content
+            const topicView = document.getElementById('topicView');
+            topicView.innerHTML = `
+                <div class="topic-header">
+                    <h1 class="topic-title-display">
+                        <i class="fas ${section.icon}"></i>
+                        ${topic.title}
+                    </h1>
+                    <div class="topic-meta">
+                        <div class="topic-meta-item">
+                            <i class="fas fa-folder"></i>
+                            ${section.name}
+                        </div>
+                        <div class="topic-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            ${topic.date || new Date().toLocaleDateString('es-ES')}
+                        </div>
+                        <div class="topic-meta-item">
+                            <i class="fas fa-comments"></i>
+                            ${topic.comments ? topic.comments.length : 0} comentarios
+                        </div>
+                    </div>
+                </div>
+
+                ${appData.isAdmin ? `
+                    <div class="admin-topic-actions" style="margin-bottom: 2rem;">
+                        <button class="btn btn-primary" onclick="editTopic('${sectionId}', ${topicIndex})">
+                            <i class="fas fa-edit"></i> Editar Contenido
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteTopicFromView('${sectionId}', ${topicIndex})">
+                            <i class="fas fa-trash"></i> Eliminar Tema
+                        </button>
+                    </div>
+                ` : ''}
+
+                <div class="topic-content-area">
+                    ${topic.content ? `
+                        <div class="content-display">${formatContent(topic.content)}</div>
+                    ` : `
+                        <div class="empty-content">
+                            <i class="fas fa-file-alt"></i>
+                            <p>Este tema aún no tiene contenido.</p>
+                            ${appData.isAdmin ? '<p>Haz clic en "Editar Contenido" para agregar información.</p>' : ''}
+                        </div>
+                    `}
+                </div>
+
+                ${appData.isAdmin && topic.isEditing ? `
+                    <div class="editor-container">
+                        <h3 style="margin-bottom: 1rem;">Editor de Contenido</h3>
+                        <div class="editor-toolbar">
+                            <button class="editor-btn" onclick="insertText('# ', '')"><i class="fas fa-heading"></i></button>
+                            <button class="editor-btn" onclick="insertText('**', '**')"><i class="fas fa-bold"></i></button>
+                            <button class="editor-btn" onclick="insertText('*', '*')"><i class="fas fa-italic"></i></button>
+                            <button class="editor-btn" onclick="insertText('\\n- ', '')"><i class="fas fa-list"></i></button>
+                            <button class="editor-btn" onclick="insertText('\\n1. ', '')"><i class="fas fa-list-ol"></i></button>
+                            <button class="editor-btn" onclick="insertText('\`', '\`')"><i class="fas fa-code"></i></button>
+                            <button class="editor-btn" onclick="insertText('\\n\`\`\`\\n', '\\n\`\`\`\\n')"><i class="fas fa-file-code"></i></button>
+                            <button class="editor-btn" onclick="insertText('> ', '')"><i class="fas fa-quote-right"></i></button>
+                        </div>
+                        <textarea id="contentEditor" class="editor-textarea">${topic.content || ''}</textarea>
+                        <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                            <button class="btn btn-success" onclick="saveTopicContent('${sectionId}', ${topicIndex})">
+                                <i class="fas fa-save"></i> Guardar Contenido
+                            </button>
+                            <button class="btn btn-secondary" onclick="cancelEdit('${sectionId}', ${topicIndex})">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="comments-section">
+                    <h2 class="comments-header">
+                        <i class="fas fa-comments"></i>
+                        Comentarios y Valoraciones
+                    </h2>
+                    
+                    <div class="comment-form">
+                        <div class="form-group">
+                            <label class="form-label">Tu nombre:</label>
+                            <input type="text" id="commentName" class="form-control" placeholder="Ingresa tu nombre">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Valoración:</label>
+                            <select id="commentRating" class="form-control">
+                                <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                                <option value="4">⭐⭐⭐⭐ Muy bueno</option>
+                                <option value="3">⭐⭐⭐ Bueno</option>
+                                <option value="2">⭐⭐ Regular</option>
+                                <option value="1">⭐ Necesita mejorar</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comentario:</label>
+                            <textarea id="commentText" class="form-control" rows="3" placeholder="Comparte tu opinión..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="addComment('${sectionId}', ${topicIndex})">
+                            <i class="fas fa-paper-plane"></i> Enviar Comentario
+                        </button>
+                    </div>
+
+                    <div id="commentsList">
+                        ${renderComments(topic.comments || [])}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Format content (basic markdown)
+        function formatContent(content) {
+            if (!content) return '';
+            
+            // Escape HTML
+            content = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Headers
+            content = content.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+            content = content.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+            content = content.replace(/^# (.*?)$/gm, '<h2>$1</h2>');
+            
+            // Bold and italic
+            content = content.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Code blocks
+            content = content.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Lists
+            content = content.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+            content = content.replace(/^- (.*?)$/gm, '<li>$1</li>');
+            content = content.replace(/^(\d+)\. (.*?)$/gm, '<li>$2</li>');
+            
+            // Wrap consecutive li elements
+            content = content.replace(/(<li>.*?<\/li>\n?)+/g, function(match) {
+                return '<ul>' + match + '</ul>';
+            });
+            
+            // Blockquotes
+            content = content.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+            
+            // Paragraphs
+            content = content.split('\n\n').map(p => {
+                if (!p.startsWith('<') && p.trim()) {
+                    return '<p>' + p + '</p>';
+                }
+                return p;
+            }).join('\n');
+            
+            return content;
+        }
+
+        // Edit topic
+        function editTopic(sectionId, topicIndex) {
+            const section = appData.sections.find(s => s.id === sectionId);
+            section.topics[topicIndex].isEditing = true;
+            showTopic(sectionId, topicIndex);
+        }
+
+        // Save topic content
+        function saveTopicContent(sectionId, topicIndex) {
+            const content = document.getElementById('contentEditor').value;
+            const section = appData.sections.find(s => s.id === sectionId);
+            section.topics[topicIndex].content = content;
+            section.topics[topicIndex].isEditing = false;
+            saveData();
+            showTopic(sectionId, topicIndex);
+        }
+
+        // Cancel edit
+        function cancelEdit(sectionId, topicIndex) {
+            const section = appData.sections.find(s => s.id === sectionId);
+            section.topics[topicIndex].isEditing = false;
+            showTopic(sectionId, topicIndex);
+        }
+
+        // Insert text in editor
+        function insertText(before, after) {
+            const editor = document.getElementById('contentEditor');
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const text = editor.value;
+            const selected = text.substring(start, end);
+            
+            before = before.replace(/\\n/g, '\n');
+            after = after.replace(/\\n/g, '\n');
+            
+            editor.value = text.substring(0, start) + before + selected + after + text.substring(end);
+            editor.focus();
+            editor.setSelectionRange(start + before.length, start + before.length + selected.length);
+        }
+
+        // Add section
+        function addSection() {
+            const name = document.getElementById('sectionName').value.trim();
+            const icon = document.getElementById('sectionIcon').value.trim() || 'fa-folder';
+            
+            if (!name) {
+                alert('Por favor ingresa un nombre para la sección');
+                return;
+            }
+            
+            const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+            
+            appData.sections.push({
+                id: id,
+                name: name,
+                icon: icon,
+                topics: []
+            });
+            
+            saveData();
+            renderSections();
+            closeModal('sectionModal');
+            
+            document.getElementById('sectionName').value = '';
+            document.getElementById('sectionIcon').value = 'fa-folder';
+        }
+
+        // Delete section
+        function deleteSection(event, sectionId) {
+            event.stopPropagation();
+            if (confirm('¿Eliminar esta sección y todos sus temas?')) {
+                appData.sections = appData.sections.filter(s => s.id !== sectionId);
+                saveData();
+                renderSections();
+                
+                if (currentSection?.id === sectionId) {
+                    showWelcome();
+                }
+            }
+        }
+
+        // Add topic
+        function addTopic() {
+            const sectionId = document.getElementById('topicSection').value;
+            const title = document.getElementById('topicTitle').value.trim();
+            
+            if (!title) {
+                alert('Por favor ingresa un título para el tema');
+                return;
+            }
+            
+            const section = appData.sections.find(s => s.id === sectionId);
+            if (section) {
+                const topic = {
+                    id: 'topic-' + Date.now(),
+                    title: title,
+                    content: '',
+                    date: new Date().toLocaleDateString('es-ES'),
+                    comments: []
+                };
+                
+                section.topics.push(topic);
+                saveData();
+                renderSections();
+                closeModal('topicModal');
+                
+                // Show the new topic
+                showTopic(sectionId, section.topics.length - 1);
+                
+                document.getElementById('topicTitle').value = '';
+            }
+        }
+
+        // Delete topic
+        function deleteTopic(event, sectionId, topicIndex) {
+            event.stopPropagation();
+            if (confirm('¿Eliminar este tema?')) {
+                const section = appData.sections.find(s => s.id === sectionId);
+                section.topics.splice(topicIndex, 1);
+                saveData();
+                renderSections();
+            }
+        }
+
+        // Delete topic from view
+        function deleteTopicFromView(sectionId, topicIndex) {
+            if (confirm('¿Eliminar este tema permanentemente?')) {
+                const section = appData.sections.find(s => s.id === sectionId);
+                section.topics.splice(topicIndex, 1);
+                saveData();
+                renderSections();
+                showWelcome();
+            }
+        }
+
+        // Show welcome
+        function showWelcome() {
+            currentSection = null;
+            currentTopic = null;
+            document.getElementById('topicView').classList.remove('active');
+            document.getElementById('welcomeView').classList.add('active');
+            renderSections();
+        }
+
+        // Add comment
+        function addComment(sectionId, topicIndex) {
+            const name = document.getElementById('commentName').value.trim();
+            const rating = document.getElementById('commentRating').value;
+            const text = document.getElementById('commentText').value.trim();
+            
+            if (!name || !text) {
+                alert('Por favor completa tu nombre y comentario');
+                return;
+            }
+            
+            const section = appData.sections.find(s => s.id === sectionId);
+            const topic = section.topics[topicIndex];
+            
+            if (!topic.comments) topic.comments = [];
+            
+            topic.comments.unshift({
+                name: name,
+                rating: parseInt(rating),
+                text: text,
+                date: new Date().toLocaleDateString('es-ES')
+            });
+            
+            saveData();
+            showTopic(sectionId, topicIndex);
+        }
+
+        // Render comments
+        function renderComments(comments) {
+            if (!comments || comments.length === 0) {
+                return '<p style="color: var(--gray); text-align: center; padding: 2rem;">No hay comentarios aún. ¡Sé el primero en comentar!</p>';
+            }
+            
+            return comments.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-header-info">
+                        <div class="comment-author">${comment.name}</div>
+                        <div class="comment-date">${comment.date}</div>
+                    </div>
+                    <div class="comment-rating">${'⭐'.repeat(comment.rating)}</div>
+                    <div class="comment-text">${comment.text}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update topic select
+        function updateTopicSelect() {
+            const select = document.getElementById('topicSection');
+            select.innerHTML = '';
+            
+            appData.sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.id;
+                option.textContent = section.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Update stats
+        function updateStats() {
+            const totalSections = appData.sections.length;
+            const totalTopics = appData.sections.reduce((acc, s) => acc + s.topics.length, 0);
+            const totalComments = appData.sections.reduce((acc, s) => 
+                acc + s.topics.reduce((tacc, t) => tacc + (t.comments?.length || 0), 0), 0);
+            
+            let totalRating = 0;
+            let ratingCount = 0;
+            appData.sections.forEach(s => {
+                s.topics.forEach(t => {
+                    if (t.comments) {
+                        t.comments.forEach(c => {
+                            totalRating += c.rating;
+                            ratingCount++;
+                        });
+                    }
+                });
+            });
+            const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '5.0';
+            
+            document.getElementById('totalSections').textContent = `${totalSections} Secciones`;
+            document.getElementById('totalTopics').textContent = `${totalTopics} Temas`;
+            document.getElementById('statSections').textContent = totalSections;
+            document.getElementById('statTopics').textContent = totalTopics;
+            document.getElementById('statComments').textContent = totalComments;
+            document.getElementById('statRating').textContent = avgRating;
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            if (modalId === 'topicModal') {
+                updateTopicSelect();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Add sample data
+        function addSampleData() {
+            appData.sections[0].topics.push({
+                id: 'topic-1',
+                title: 'Introducción a la Estadística Descriptiva',
+                content: `# Introducción a la Estadística Descriptiva
+
+La estadística descriptiva es una rama fundamental de la estadística que se encarga de recolectar, organizar, resumir y presentar datos de manera informativa.
+
+## Conceptos Fundamentales
+
+### Medidas de Tendencia Central
+Las medidas de tendencia central nos ayudan a identificar el valor típico o representativo de un conjunto de datos:
+
+- **Media**: El promedio aritmético de todos los valores
+- **Mediana**: El valor central cuando los datos están ordenados
+- **Moda**: El valor que más se repite en el conjunto de datos
+
+### Medidas de Dispersión
+Estas medidas nos indican qué tan dispersos están los datos:
+
+- **Rango**: Diferencia entre el valor máximo y mínimo
+- **Varianza**: Promedio de las desviaciones cuadráticas respecto a la media
+- **Desviación Estándar**: Raíz cuadrada de la varianza
+
+## Ejemplo Práctico
+
+Consideremos un conjunto de datos de ventas mensuales:
+\`\`\`
+Datos: [1200, 1350, 1100, 1450, 1300, 1250]
+Media: 1275
+Mediana: 1275
+Desviación Estándar: 125.83
+\`\`\`
+
+> La estadística descriptiva es la base para comprender patrones en los datos antes de aplicar técnicas más avanzadas.`,
+                date: new Date().toLocaleDateString('es-ES'),
+                comments: [
+                    {
+                        name: 'Ana García',
+                        rating: 5,
+                        text: 'Excelente explicación, muy clara y concisa.',
+                        date: new Date().toLocaleDateString('es-ES')
+                    }
+                ]
+            });
+
+            appData.sections[1].topics.push({
+                id: 'topic-2',
+                title: 'Gestión de Inventarios y Supply Chain',
+                content: `# Gestión de Inventarios en Supply Chain
+
+## Importancia del Control de Inventarios
+
+El control de inventarios es crucial para:
+- Minimizar costos de almacenamiento
+- Garantizar disponibilidad de productos
+- Optimizar el flujo de caja
+
+## Métodos de Gestión
+
+### 1. Modelo EOQ (Economic Order Quantity)
+Calcula la cantidad óptima de pedido que minimiza los costos totales.
+
+### 2. Sistema ABC
+Clasifica los inventarios según su importancia:
+- **Clase A**: 20% de items, 80% del valor
+- **Clase B**: 30% de items, 15% del valor
+- **Clase C**: 50% de items, 5% del valor
+
+### 3. Just-In-Time (JIT)
+Minimiza el inventario recibiendo materiales justo cuando se necesitan.`,
+                date: new Date().toLocaleDateString('es-ES'),
+                comments: []
+            });
+
+            appData.sections[2].topics.push({
+                id: 'topic-3',
+                title: 'Machine Learning para Supply Chain',
+                content: `# Machine Learning en Supply Chain
+
+## Aplicaciones Principales
+
+El Machine Learning está revolucionando la gestión de cadenas de suministro:
+
+### Predicción de Demanda
+Utiliza algoritmos como:
+- **ARIMA**: Para series temporales
+- **Random Forest**: Para múltiples variables
+- **Redes Neuronales**: Para patrones complejos
+
+### Optimización de Rutas
+Algoritmos que mejoran la eficiencia logística:
+- Reducción de tiempos de entrega
+- Minimización de costos de transporte
+- Optimización de carga de vehículos
+
+### Detección de Anomalías
+Identifica problemas antes de que ocurran:
+- Predicción de fallos en equipos
+- Detección de fraudes
+- Identificación de cuellos de botella`,
+                date: new Date().toLocaleDateString('es-ES'),
+                comments: []
+            });
+
+            saveData();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
