@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DataDriven SCM - Supply Chain Intelligence</title>
@@ -1029,7 +1030,7 @@
 
     <!-- Login Container -->
     <div class="login-container" id="loginContainer">
-        <button class="login-btn" onclick="openModal('loginModal')">
+        <button class="login-btn" onclick="netlifyIdentity.open()">
             <i class="fas fa-lock"></i>
             Acceso Admin
         </button>
@@ -1131,8 +1132,6 @@
                     topics: []
                 }
             ],
-            isAdmin: false,
-            adminPassword: 'SMJCVO1988' // En producción, esto debería estar en un servidor
         };
 
         let currentSection = null;
